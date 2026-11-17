@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="ko" translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google" content="notranslate">
+    <title id="page-title">영단어·문장 주관식 시험</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Jua & Noto Sans KR -->
+    <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f0f7ff;
+            color: #1e293b;
+        }
+        .font-jua {
+            font-family: 'Jua', sans-serif;
+        }
+        .card-shadow {
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.1), 0 8px 10px -6px rgba(59, 130, 246, 0.1);
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e0f2fe;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #7dd3fc;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col notranslate select-none" translate="no">
+
+    <!-- Top Header -->
+    <header class="bg-white border-b-4 border-sky-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 py-3 sm:py-4 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="bg-sky-500 text-white w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-md">
+                    <i class="fa-solid fa-spell-check"></i>
+                </div>
+                <div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span id="header-badge" class="bg-sky-100 text-sky-700 text-xs sm:text-sm font-bold px-2.5 py-0.5 rounded-full border border-sky-300">
+                            초등 5학년 영단어·문장 주관식 시험
+                        </span>
+                        <span class="text-xs text-slate-500 hidden sm:inline">총 10문항 · 문항당 10점 (100점 만점)</span>
+                    </div>
+                    <h1 class="font-jua text-xl sm:text-2xl text-slate-800 mt-0.5">
+                        핵심 표현·문장 쓰기 시험 : <span id="header-unit" class="text-sky-600">주말 활동 (Weekend Activities)</span>
+                    </h1>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-4xl w-full mx-auto px-4 py-6 sm:py-8">
+
+        <!-- Custom Notification Toast -->
+        <div id="toast-box" class="fixed bottom-5 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+            <div class="bg-slate-800 text-white px-6 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 font-medium text-base">
+                <i id="toast-icon" class="fa-solid fa-circle-info text-sky-400 text-xl"></i>
+                <span id="toast-message">알림 메시지</span>
+            </div>
+        </div>
+
+        <!-- VIEW 1: STUDENT VOCABULARY TEST VIEW -->
+        <div id="student-view" class="space-y-6">
+            
+            <!-- Student Info Card -->
+            <section class="bg-white rounded-3xl p-6 sm:p-8 card-shadow border-2 border-sky-100">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-amber-100 text-amber-700 w-8 h-8 rounded-full flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-user-pen"></i>
+                        </span>
+                        <h2 class="font-jua text-xl sm:text-2xl text-slate-800">응시자 정보 입력</h2>
+                    </div>
+                </div>
+                <!-- 중복 기기 사칭 경고 배너 (평소엔 숨김) -->
+                <div id="duplicate-warning-banner" class="hidden mb-4 bg-rose-600 text-white px-4 py-3 rounded-2xl font-bold flex items-center gap-3 animate-pulse shadow-md">
+                    <span class="text-2xl">🚨</span>
+                    <div class="text-sm sm:text-base" id="duplicate-warning-text"></div>
+                </div>
+                <!-- 화면 이탈(탭/창 전환) 전체 화면 경고 모달 -->
+                <div id="tab-leave-modal" class="hidden fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 text-center border-4 border-rose-500 shadow-2xl">
+                        <div class="text-5xl mb-3">🚨</div>
+                        <h3 class="font-jua text-2xl sm:text-3xl text-rose-600 mb-2">화면 이동(이탈) 감지!</h3>
+                        <p class="text-slate-700 font-bold text-base sm:text-lg mb-2">
+                            시험 중 다른 탭이나 창으로 이동할 수 없습니다.
+                        </p>
+                        <p class="bg-rose-50 text-rose-700 border border-rose-200 rounded-xl py-2.5 px-4 text-sm font-bold mb-6">
+                            현재 누적 화면 이탈: <span id="modal-leave-count" class="text-lg underline">1</span>회 (선생님 시트에 자동 기록됨)
+                        </p>
+                        <button type="button" onclick="closeTabLeaveModal()"
+                            class="w-full bg-rose-600 hover:bg-rose-700 text-white font-jua text-xl py-3.5 rounded-2xl shadow-lg transition cursor-pointer">
+                            확인 (시험 계속하기)
+                        </button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="student-id" class="block text-sm font-bold text-slate-600 mb-1.5">학번 (예: 50101)</label>
+                        <input type="text" id="student-id" placeholder="학번을 입력하세요" maxlength="10"
+                            class="w-full px-4 py-3 text-lg rounded-2xl border-2 border-slate-200 focus:border-sky-500 focus:outline-none bg-slate-50 focus:bg-white transition">
+                    </div>
+                    <div>
+                        <label for="student-name" class="block text-sm font-bold text-slate-600 mb-1.5">이름</label>
+                        <input type="text" id="student-name" placeholder="이름을 입력하세요" maxlength="15"
+                            class="w-full px-4 py-3 text-lg rounded-2xl border-2 border-slate-200 focus:border-sky-500 focus:outline-none bg-slate-50 focus:bg-white transition">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Result Summary Banner (Hidden until submitted) -->
+            <section id="result-banner" class="hidden bg-gradient-to-r from-sky-500 to-indigo-500 text-white rounded-3xl p-6 sm:p-8 shadow-lg">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div>
+                        <span class="bg-white/20 text-white text-sm font-bold px-3 py-1 rounded-full">주관식 시험 채점 완료!</span>
+                        <h2 id="result-title" class="font-jua text-2xl sm:text-3xl mt-2">참 잘했어요!</h2>
+                        <p id="result-subtitle" class="text-sky-100 mt-1 text-base sm:text-lg">틀린 문제의 모범 답안을 아래에서 다시 한 번 확인해 보세요.</p>
+                    </div>
+                    <div class="bg-white text-slate-800 rounded-2xl px-8 py-4 text-center shadow-inner min-w-[160px]">
+                        <div class="text-sm font-bold text-slate-500">시험 점수</div>
+                        <div class="font-jua text-4xl sm:text-5xl text-sky-600 mt-1"><span id="score-display">100</span><span class="text-2xl text-slate-600">점</span></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dynamic Questions Container -->
+            <div id="questions-container" class="space-y-5">
+                <!-- 10 Vocabulary Questions will be rendered dynamically here -->
+            </div>
+
+            <!-- Submit Button -->
+            <div class="pt-4 pb-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <button id="submit-btn" onclick="submitAssessment()" 
+                    class="w-full sm:w-auto bg-sky-500 hover:bg-sky-600 active:scale-95 text-white font-jua text-2xl py-4 px-12 rounded-3xl shadow-lg shadow-sky-200 transition flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>단어 시험 제출하기 (선생님께 전송)</span>
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // =========================================================================
+        // ★★★ [교사 수정 영역] 다른 학년·단원으로 바꿀 때 아래 설정만 수정하세요! ★★★
+        // =========================================================================
+        const TEST_CONFIG = {
+            // [수정 1] 학년 및 단원 제목 설정
+            gradeBadge: "초등 5학년 영단어·문장 주관식 시험",
+            unitTitle: "주말 활동 (Weekend Activities)",
+
+            // [수정 2] 구글 스프레드시트 Apps Script 웹 앱 URL
+            googleSheetWebAppUrl: "https://script.google.com/macros/s/AKfycbwxTZa48xldPtYCWo_uxKwpLxzUOaVBkwNoQV9nUDO4JsLEbTdaguZRghlR6ood3JCstQ/exec",
+
+            // [수정 3] 출제할 10문항 목록 (1~5번: 영어→뜻 쓰기 / 6~10번: 뜻→영어 쓰기)
+            questions: [
+                // --- 1~5번: 영어 표현(문장)을 보고 우리말 뜻 쓰기 ---
+                {
+                    num: 1,
+                    type: 'write_meaning',
+                    english: 'read books',
+                    displayMeaning: '책을 읽다',
+                    acceptedMeanings: ['책을 읽다', '책 읽기', '독서하다', '독서']
+                },
+                {
+                    num: 2,
+                    type: 'write_meaning',
+                    english: 'watch movies',
+                    displayMeaning: '영화를 보다',
+                    acceptedMeanings: ['영화를 보다', '영화 보기', '영화 감상하다']
+                },
+                {
+                    num: 3,
+                    type: 'write_meaning',
+                    english: 'visit my grandparents',
+                    displayMeaning: '조부모님 댁에 방문하다',
+                    acceptedMeanings: ['조부모님 댁에 방문하다', '조부모님 댁에 가다', '할아버지 할머니 댁에 가다', '조부모님을 방문하다', '조부모님 댁 방문하기']
+                },
+                {
+                    num: 4,
+                    type: 'write_meaning',
+                    english: 'What do you do on weekends?',
+                    displayMeaning: '너는 주말에 무엇을 하니?',
+                    acceptedMeanings: ['너는 주말에 무엇을 하니', '주말에 무엇을 하니', '너는 주말에 뭐 하니', '주말에 뭐 해', '너는 주말에 무엇을 합니까']
+                },
+                {
+                    num: 5,
+                    type: 'write_meaning',
+                    english: 'I play soccer on weekends.',
+                    displayMeaning: '나는 주말에 축구를 해.',
+                    acceptedMeanings: ['나는 주말에 축구를 해', '나는 주말에 축구를 한다', '나는 주말에 축구를 합니다', '주말에 축구를 해', '주말에 축구를 한다']
+                },
+
+                // --- 6~10번: 우리말 뜻을 보고 영어 표현(문장) 쓰기 ---
+                {
+                    num: 6,
+                    type: 'write_english',
+                    english: 'play soccer',
+                    displayMeaning: '축구를 하다'
+                },
+                {
+                    num: 7,
+                    type: 'write_english',
+                    english: 'ride a bike',
+                    displayMeaning: '자전거를 타다'
+                },
+                {
+                    num: 8,
+                    type: 'write_english',
+                    english: 'weekend',
+                    displayMeaning: '주말'
+                },
+                {
+                    num: 9,
+                    type: 'write_english',
+                    english: 'What do you do on weekends?',
+                    displayMeaning: '너는 주말에 무엇을 하니?'
+                },
+                {
+                    num: 10,
+                    type: 'write_english',
+                    english: 'I watch movies on weekends.',
+                    displayMeaning: '나는 주말에 영화를 봐.'
+                }
+            ]
+        };
+        // =========================================================================
+        // ★★★ 여기까지만 수정하시면 나머지 채점·통계·번역차단은 자동 작동합니다! ★★★
+        // =========================================================================
+
+        const GOOGLE_SHEET_WEBAPP_URL = TEST_CONFIG.googleSheetWebAppUrl;
+        const VOCAB_QUESTIONS = TEST_CONFIG.questions;
+        const STORAGE_KEY = 'vocab_quiz_' + TEST_CONFIG.unitTitle.replace(/\s+/g, '_');
+
+        let isSubmitted = false;
+        let cachedResults = [];
+        let sharedAudioCtx = null;
+        let tabLeaveCount = 0;
+        let lastLeaveTimestamp = 0;
+
+        function unlockAudioContext() {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            if (!sharedAudioCtx) {
+                sharedAudioCtx = new AudioCtx();
+            }
+            if (sharedAudioCtx.state === 'suspended') {
+                sharedAudioCtx.resume();
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            applyConfigToUI();
+            initStorage();
+            renderQuestions();
+            enableAntiCheatGuards();
+        });
+
+        // 영어 문항 영역 우클릭, 복사 단축키, 화면 이탈(탭/창 이동) 원천 차단
+        function enableAntiCheatGuards() {
+            const qContainer = document.getElementById('questions-container');
+            if (!qContainer) return;
+
+            qContainer.addEventListener('contextmenu', (e) => {
+                if (e.target.tagName !== 'INPUT') {
+                    e.preventDefault();
+                    showToast('시험 문제 영역에서는 우클릭을 사용할 수 없습니다.', 'warning');
+                }
+            });
+
+            qContainer.addEventListener('copy', (e) => {
+                if (e.target.tagName !== 'INPUT') {
+                    e.preventDefault();
+                    showToast('문제 복사는 금지되어 있습니다!', 'warning');
+                }
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C')) {
+                    const activeEl = document.activeElement;
+                    if (!activeEl || activeEl.tagName !== 'INPUT') {
+                        e.preventDefault();
+                        showToast('단축키 복사(Ctrl+C)는 사용할 수 없습니다!', 'warning');
+                    }
+                }
+            });
+
+            // 1. 다른 탭 전환 및 창 최소화 감지
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden && !isSubmitted) {
+                    recordTabLeave();
+                }
+            });
+
+            // 2. 다른 프로그램/창 클릭(포커스 이탈) 감지
+            window.addEventListener('blur', () => {
+                if (!isSubmitted) {
+                    recordTabLeave();
+                }
+            });
+
+            // 3. 실수로 뒤로가기/새로고침 시 브라우저 이탈 경고 팝업
+            window.addEventListener('beforeunload', (e) => {
+                if (!isSubmitted) {
+                    e.preventDefault();
+                    e.returnValue = '';
+                }
+            });
+        }
+
+        function recordTabLeave() {
+            const now = Date.now();
+            // visibilitychange와 blur가 동시에 발생할 때 중복 카운트 방지 (1초 쿨타임)
+            if (now - lastLeaveTimestamp < 1000) return;
+            lastLeaveTimestamp = now;
+
+            tabLeaveCount++;
+            const modalCount = document.getElementById('modal-leave-count');
+            const modal = document.getElementById('tab-leave-modal');
+
+            if (modalCount) modalCount.textContent = tabLeaveCount;
+            if (modal) modal.classList.remove('hidden');
+
+            // 짧은 경고 비프음 재생
+            try {
+                unlockAudioContext();
+                if (sharedAudioCtx) {
+                    const osc = sharedAudioCtx.createOscillator();
+                    const gain = sharedAudioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(780, sharedAudioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.2, sharedAudioCtx.currentTime);
+                    osc.connect(gain);
+                    gain.connect(sharedAudioCtx.destination);
+                    osc.start();
+                    osc.stop(sharedAudioCtx.currentTime + 0.35);
+                }
+            } catch (e) {}
+        }
+
+        function closeTabLeaveModal() {
+            const modal = document.getElementById('tab-leave-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function applyConfigToUI() {
+            document.getElementById('page-title').textContent = `${TEST_CONFIG.gradeBadge} - ${TEST_CONFIG.unitTitle}`;
+            document.getElementById('header-badge').textContent = TEST_CONFIG.gradeBadge;
+            document.getElementById('header-unit').textContent = TEST_CONFIG.unitTitle;
+        }
+
+        // ==========================================
+        // 2. RENDER 10 SUBJECTIVE QUESTIONS
+        // ==========================================
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = '';
+
+            VOCAB_QUESTIONS.forEach(q => {
+                const card = document.createElement('div');
+                card.id = `q-card-${q.num}`;
+                card.className = 'bg-white rounded-3xl p-6 sm:p-7 card-shadow border-2 border-sky-100 relative overflow-hidden transition';
+
+                let innerHTML = `<div id="badge-${q.num}" class="hidden absolute top-4 right-5 text-3xl font-bold"></div>`;
+
+                if (q.type === 'write_meaning') {
+                    innerHTML += `
+                        <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pr-10">
+                            <div class="flex items-center gap-3">
+                                <span class="bg-sky-500 text-white font-jua text-xl w-9 h-9 rounded-xl flex items-center justify-center shadow-sm">${q.num}</span>
+                                <h3 class="font-bold text-lg sm:text-xl text-slate-800">다음 영어 표현(문장)을 읽고, <span class="text-sky-600">우리말 뜻</span>을 쓰세요.</h3>
+                            </div>
+                        </div>
+                        <div class="bg-sky-50/70 rounded-2xl p-4 sm:p-5 border border-sky-100 space-y-3">
+                            <div>
+                                <span class="text-xs font-bold text-sky-600 bg-sky-100 px-2.5 py-0.5 rounded-md">영어 문제</span>
+                                <p lang="en" translate="no" class="notranslate font-bold text-2xl sm:text-3xl text-slate-800 mt-1.5 tracking-wide select-none">${q.english}</p>
+                            </div>
+                            <input type="text" id="q${q.num}-input" placeholder="우리말 뜻을 직접 입력하세요" autocomplete="off"
+                                class="w-full px-4 py-3 text-lg font-medium rounded-xl border-2 border-sky-300 focus:border-sky-600 focus:outline-none bg-white text-slate-800">
+                        </div>
+                    `;
+                } else if (q.type === 'write_english') {
+                    innerHTML += `
+                        <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pr-10">
+                            <div class="flex items-center gap-3">
+                                <span class="bg-emerald-500 text-white font-jua text-xl w-9 h-9 rounded-xl flex items-center justify-center shadow-sm">${q.num}</span>
+                                <h3 class="font-bold text-lg sm:text-xl text-slate-800">다음 우리말 뜻을 보고, <span class="text-emerald-600">영어 표현(문장)</span>을 쓰세요.</h3>
+                            </div>
+                        </div>
+                        <div class="bg-emerald-50/60 rounded-2xl p-4 sm:p-5 border border-emerald-100 space-y-3">
+                            <div>
+                                <span class="text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-md">우리말 뜻</span>
+                                <p class="font-jua text-2xl sm:text-3xl text-slate-800 mt-1.5 select-none">${q.displayMeaning}</p>
+                            </div>
+                            <input type="text" id="q${q.num}-input" placeholder="영어로 직접 입력하세요" autocomplete="off"
+                                class="w-full px-4 py-3 text-lg font-bold rounded-xl border-2 border-emerald-300 focus:border-emerald-600 focus:outline-none bg-white text-emerald-900">
+                        </div>
+                    `;
+                }
+
+                innerHTML += `<div id="exp-${q.num}" class="hidden mt-4 p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-sm sm:text-base"></div>`;
+                card.innerHTML = innerHTML;
+                container.appendChild(card);
+            });
+        }
+
+        // ==========================================
+        // 3. GRADING & SUBMISSION
+        // ==========================================
+        function normalizeEnglish(str) {
+            return str.trim().toLowerCase().replace(/[.?!]+$/g, '').replace(/\s+/g, ' ');
+        }
+
+        function normalizeKorean(str) {
+            return str.trim().replace(/[.?!]+$/g, '').replace(/\s+/g, '');
+        }
+
+        async function submitAssessment() {
+            if (isSubmitted) return;
+            unlockAudioContext(); // 버튼 클릭 즉시 브라우저 소리 잠금 해제
+
+            const studentId = document.getElementById('student-id').value.trim();
+            const studentName = document.getElementById('student-name').value.trim();
+
+            if (!studentId || !studentName) {
+                showToast('학번과 이름을 모두 입력해 주세요!', 'warning');
+                document.getElementById(!studentId ? 'student-id' : 'student-name').focus();
+                return;
+            }
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>제출 및 기기 확인 중...</span>';
+
+            const currentDeviceId = getDeviceId();
+            let prevOtherStudent = cachedResults.find(item => item.id !== studentId || item.name !== studentName);
+            let isDuplicateAny = cachedResults.length > 0;
+
+            // 구글 시트 실시간 역조회로 F5·시크릿창에서도 이미 제출된 기기인지 확인
+            if (GOOGLE_SHEET_WEBAPP_URL && GOOGLE_SHEET_WEBAPP_URL.startsWith('http')) {
+                try {
+                    const res = await fetch(GOOGLE_SHEET_WEBAPP_URL);
+                    const sheetRows = await res.json();
+                    const sheetMatch = sheetRows.find(r => r.submitter && r.submitter.includes(currentDeviceId));
+                    if (sheetMatch) {
+                        isDuplicateAny = true;
+                        if (String(sheetMatch.id) !== studentId || String(sheetMatch.name) !== studentName) {
+                            prevOtherStudent = { id: String(sheetMatch.id), name: String(sheetMatch.name) };
+                        }
+                    }
+                } catch (e) {
+                    // 조회 실패 시 로컬 기록 및 시트 자체 중복 검사로 폴백
+                }
+            }
+
+            let score = 0;
+            const wrongQuestions = [];
+
+            VOCAB_QUESTIONS.forEach(q => {
+                let isCorrect = false;
+                let correctAnswerDisplay = '';
+                const rawInput = document.getElementById(`q${q.num}-input`).value;
+
+                if (q.type === 'write_meaning') {
+                    const userKo = normalizeKorean(rawInput);
+                    isCorrect = userKo.length > 0 && q.acceptedMeanings.some(ans => normalizeKorean(ans) === userKo);
+                    correctAnswerDisplay = `${q.displayMeaning} (${q.english})`;
+                } else if (q.type === 'write_english') {
+                    const userEn = normalizeEnglish(rawInput);
+                    isCorrect = userEn.length > 0 && userEn === normalizeEnglish(q.english);
+                    correctAnswerDisplay = `${q.english} (${q.displayMeaning})`;
+                }
+
+                if (isCorrect) {
+                    score += 10;
+                } else {
+                    wrongQuestions.push(q.num);
+                }
+
+                showQuestionFeedback(q.num, isCorrect, correctAnswerDisplay);
+            });
+
+            isSubmitted = true;
+
+            // Lock inputs
+            document.querySelectorAll('#student-view input').forEach(el => el.disabled = true);
+
+            // Show Result Banner
+            const banner = document.getElementById('result-banner');
+            banner.classList.remove('hidden');
+            document.getElementById('score-display').textContent = score;
+            document.getElementById('result-title').textContent =
+                score === 100 ? `완벽해요, ${studentName} 학생! 단어 왕! 🏆` :
+                score >= 80 ? `참 잘했어요, ${studentName} 학생! 👏` :
+                `수고했어요, ${studentName} 학생! 틀린 단어를 복습해 보자! 💪`;
+
+            const now = new Date();
+            // 동일 기기 중복 제출(사칭) 및 화면 이탈 여부 종합 기록
+            const leaveNote = tabLeaveCount > 0 ? ` | 👀화면이탈 ${tabLeaveCount}회` : '';
+            const baseStatus = prevOtherStudent
+                ? `🚨중복기기 의심! (기존: ${prevOtherStudent.id} ${prevOtherStudent.name})`
+                : (isDuplicateAny ? `⚠️동일학생 재제출` : '✅정상');
+            const deviceStatus = baseStatus + leaveNote;
+
+            if (prevOtherStudent) {
+                triggerSirenAlert(`삐용삐용! 이 기기(${currentDeviceId})에서 이미 [${prevOtherStudent.id} ${prevOtherStudent.name}] 학생이 제출했습니다. 중복 제출 기록이 선생님 시트에 전송됩니다!`);
+            } else if (isDuplicateAny) {
+                triggerSirenAlert(`삐용삐용! 이 기기(${currentDeviceId})에서 이미 시험을 제출한 기록이 있습니다. 재제출 기록이 선생님 시트에 함께 전송됩니다!`);
+            }
+
+            saveResult({
+                id: studentId,
+                name: studentName,
+                score: score,
+                wrongQuestions: wrongQuestions,
+                timestamp: timeStr,
+                deviceId: currentDeviceId,
+                duplicateStatus: deviceStatus
+            });
+
+            document.getElementById('submit-btn').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function triggerSirenAlert(msg) {
+            const warnBanner = document.getElementById('duplicate-warning-banner');
+            const warnText = document.getElementById('duplicate-warning-text');
+            warnText.textContent = msg;
+            warnBanner.classList.remove('hidden');
+
+            // 삐용삐용 사이렌 효과음 (클릭 시 깨워둔 sharedAudioCtx 사용)
+            try {
+                unlockAudioContext();
+                if (!sharedAudioCtx) return;
+                const osc = sharedAudioCtx.createOscillator();
+                const gain = sharedAudioCtx.createGain();
+                osc.type = 'sawtooth';
+                gain.gain.setValueAtTime(0.25, sharedAudioCtx.currentTime);
+                osc.connect(gain);
+                gain.connect(sharedAudioCtx.destination);
+
+                const now = sharedAudioCtx.currentTime;
+                osc.frequency.setValueAtTime(920, now);
+                osc.frequency.linearRampToValueAtTime(560, now + 0.25);
+                osc.frequency.linearRampToValueAtTime(920, now + 0.5);
+                osc.frequency.linearRampToValueAtTime(560, now + 0.75);
+                osc.frequency.linearRampToValueAtTime(920, now + 1.0);
+                osc.frequency.linearRampToValueAtTime(560, now + 1.25);
+
+                osc.start(now);
+                osc.stop(now + 1.3);
+            } catch (e) {}
+        }
+
+        function showQuestionFeedback(qNum, isCorrect, correctText) {
+            const card = document.getElementById(`q-card-${qNum}`);
+            const badge = document.getElementById(`badge-${qNum}`);
+            const exp = document.getElementById(`exp-${qNum}`);
+
+            badge.classList.remove('hidden');
+            exp.classList.remove('hidden');
+
+            if (isCorrect) {
+                card.classList.remove('border-sky-100');
+                card.classList.add('border-emerald-400', 'bg-emerald-50/20');
+                badge.innerHTML = '<span class="text-emerald-500">⭕</span>';
+                exp.className = 'mt-4 p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900';
+                exp.innerHTML = `<span class="font-bold">정답입니다!</span> <span class="text-emerald-700">(${correctText})</span>`;
+            } else {
+                card.classList.remove('border-sky-100');
+                card.classList.add('border-rose-400', 'bg-rose-50/20');
+                badge.innerHTML = '<span class="text-rose-500">❌</span>';
+                exp.className = 'mt-4 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900';
+                exp.innerHTML = `<span class="font-bold text-rose-600">아쉬워요! 정답:</span> <span class="font-bold underline">${correctText}</span>`;
+            }
+        }
+
+        // ==========================================
+        // 5. STORAGE & CLOUD SYNC (하드웨어 지문 기반 고정 기기 ID)
+        // ==========================================
+        let cachedHardwareDeviceId = null;
+
+        function getDeviceId() {
+            if (cachedHardwareDeviceId) return cachedHardwareDeviceId;
+
+            try {
+                // Canvas 그래픽 렌더링 미세 차이 + 화면 해상도·색심도·CPU·플랫폼·타임존 조합
+                const canvas = document.createElement('canvas');
+                canvas.width = 220;
+                canvas.height = 40;
+                const ctx = canvas.getContext('2d');
+                ctx.textBaseline = 'top';
+                ctx.font = '16px Arial';
+                ctx.fillStyle = '#f60';
+                ctx.fillRect(10, 5, 80, 20);
+                ctx.fillStyle = '#069';
+                ctx.fillText('Chromebook-ID-Check-2026!@#', 2, 10);
+                const canvasData = canvas.toDataURL();
+
+                const hwFingerprint = [
+                    canvasData,
+                    navigator.userAgent,
+                    navigator.language,
+                    screen.width + 'x' + screen.height + 'x' + screen.colorDepth,
+                    navigator.hardwareConcurrency || '',
+                    navigator.deviceMemory || '',
+                    Intl.DateTimeFormat().resolvedOptions().timeZone || ''
+                ].join('||');
+
+                // 32비트 해시 변환 (새로고침/시크릿창에서도 항상 동일한 코드 생성)
+                let hash1 = 0x811c9dc5;
+                let hash2 = 0x1b873593;
+                for (let i = 0; i < hwFingerprint.length; i++) {
+                    const ch = hwFingerprint.charCodeAt(i);
+                    hash1 ^= ch;
+                    hash1 = Math.imul(hash1, 0x01000193);
+                    hash2 ^= ch;
+                    hash2 = Math.imul(hash2, 0x85ebca6b);
+                }
+                const part1 = (hash1 >>> 0).toString(36).toUpperCase().padStart(4, '0').slice(0, 4);
+                const part2 = (hash2 >>> 0).toString(36).toUpperCase().padStart(4, '0').slice(0, 4);
+
+                cachedHardwareDeviceId = 'DEV-' + part1 + part2;
+            } catch (e) {
+                cachedHardwareDeviceId = 'DEV-FALLBACK';
+            }
+
+            return cachedHardwareDeviceId;
+        }
+
+        function initStorage() {
+            const existing = localStorage.getItem(STORAGE_KEY);
+            if (existing) {
+                try {
+                    cachedResults = JSON.parse(existing) || [];
+                } catch (e) {
+                    cachedResults = [];
+                }
+            }
+        }
+
+        async function saveResult(newEntry) {
+            const idx = cachedResults.findIndex(item => item.id === newEntry.id && item.name === newEntry.name);
+            if (idx !== -1) cachedResults[idx] = newEntry;
+            else cachedResults.push(newEntry);
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(cachedResults));
+
+            if (GOOGLE_SHEET_WEBAPP_URL && GOOGLE_SHEET_WEBAPP_URL.startsWith('http')) {
+                try {
+                    await fetch(GOOGLE_SHEET_WEBAPP_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify(newEntry)
+                    });
+                    showToast('채점 완료! 선생님 구글 스프레드시트로 전송되었습니다.', 'success');
+                } catch (error) {
+                    showToast('채점 완료! (네트워크 오류로 기기에 임시 저장됨)', 'warning');
+                }
+            } else {
+                showToast('단어 시험 채점이 완료되었습니다!', 'success');
+            }
+        }
+
+        // ==========================================
+        // 6. UTILITIES
+        // ==========================================
+        let toastTimer;
+        function showToast(message, type = 'info') {
+            const box = document.getElementById('toast-box');
+            const msgEl = document.getElementById('toast-message');
+            const iconEl = document.getElementById('toast-icon');
+
+            msgEl.textContent = message;
+            if (type === 'success') iconEl.className = 'fa-solid fa-circle-check text-emerald-400 text-xl';
+            else if (type === 'warning') iconEl.className = 'fa-solid fa-triangle-exclamation text-amber-400 text-xl';
+            else if (type === 'error') iconEl.className = 'fa-solid fa-circle-xmark text-rose-400 text-xl';
+            else iconEl.className = 'fa-solid fa-circle-info text-sky-400 text-xl';
+
+            box.classList.remove('translate-y-24', 'opacity-0');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => box.classList.add('translate-y-24', 'opacity-0'), 3200);
+        }
+    </script>
+</body>
+</html>
